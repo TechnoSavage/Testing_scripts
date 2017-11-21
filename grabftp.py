@@ -10,11 +10,13 @@ from contextlib import closing
 def download(address, user=None, passwd=None):
     file_list = ['126M.mp4', '474M.wmv', '50M.mp4', '8M.mp4']
     chosen = file_list[random.randrange(0,3)]
-    url = 'ftp://' + user + ':' + passwd + '@' + address + '/' + chosen
+    url = 'ftp://%s:%s@%s/%s' % (user, passwd, address, chosen)
     print "Downloading %s from %s" % (chosen, url)
-    with closing(urllib2.urlopen(url)) as r:
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req)
+    with closing(response) as r:
         with open(chosen, 'wb') as f:
-            shutil.copyfilejob(r, f)
+            shutil.copyfileobj(r, f)
 
 if __name__ == '__main__':
     address = '192.168.1.210'
