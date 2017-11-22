@@ -2,7 +2,7 @@
 
 #! /usr/bin/python
 
-import urllib, time, random, shutil
+import urllib2, time, random, shutil
 from getpass import getpass
 from contextlib import closing
 
@@ -10,11 +10,12 @@ from contextlib import closing
 def download(address, user=None, passwd=None):
     file_list = ['126M.mp4', '474M.wmv', '50M.mp4', '8M.mp4']
     chosen = file_list[random.randrange(0,3)]
-    url = 'ftp://%s:%s@%s' % (user, passwd, address)
+    url = 'ftp://%s:%s@%s/%s' % (user, passwd, address, chosen)
     print "Downloading %s from %s" % (chosen, url)
-    data = urllib.urlretrieve(url, chosen)
-    with open(chosen, 'wb') as f:
-        f.write(data)
+    path = '/dev/null/%s' % chosen
+    with closing(urllib2.urlopen(url)) as r:
+        with open(path, 'wb') as f:
+            shutil.copyfileobj(r, f)
     print "Download Finished"
 
 if __name__ == '__main__':
@@ -25,4 +26,6 @@ if __name__ == '__main__':
 
     while True:
         download(address, user, passwd)
-        time.sleep(900 + random.randrange(3600))
+        x = 900 + random.randrange(3600)
+        print "Waiting for %s" % x
+        time.sleep(x)
