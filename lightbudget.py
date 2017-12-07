@@ -8,21 +8,19 @@ def menu():
     option = raw_input("""\nWhat would you like to do:
     1 - Calculate the max allowed coupler loss for inserting a TAP into a link
     2 - Calculate the max allowed cable length for a given TAP split ratio in a link
-    3 - Exit
+    3 - Display ethernet fiber standards and max cabling distance
+    4 - Exit
     Enter your selection: """)
-    try:
-        option = int(option)
-        if option not in (1, 2, 3):
-            print "That is not a valid input"
-            menu()
-    except:
+    if option not in ('1', '2', '3', '4'):
         print "That is not a valid input"
         menu()
-    if option == 1:
+    if option == '1':
         max_split()
-    elif option == 2:
+    elif option == '2':
         max_cable()
-    elif option == 3:
+    elif option == '3':
+        ethernet_table()
+    elif option == '4':
         print "Goodbye"
         exit()
     else:
@@ -285,6 +283,27 @@ def max_cable():
         cable_mon = 2000
     print "\nThe maximum combined cable length from sender to TAP and from TAP to receiver is %s meters" % cable_net
     print "\nThe maximum combined cable length from sender to TAP and from TAP monitor to tool is %s meters" % cable_mon
+    menu()
+
+def ethernet_table():
+    print """Ethernet Fiber Standards and max cabling distance:
+     ________________________________________________________________________________________________________________
+    |         |    Core/   |      | FastEthernet |  1G Ethernet  |  1G Ethernet  |    10G    |    40G    |    100G   |
+    |  Name   |  Cladding  | Type |  100BaseFX   |  1000Base-SX  |  1000Base-LX  |  10GBase  |  40GBase  |  100GBase |
+    | ________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    |   OM1   |  62.5/125  |  MM  |    2000M     |      275M     |     550M*     |    33M    |     NA    |     NA    |
+    |_________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    |   OM2   |  62.5/125  |  MM  |    2000M     |      550M     |     550M*     |    82M    |     NA    |     NA    |
+    |_________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    |   OM3   |   50/125   |  MM  |    2000M     |      550M     |     550M      |   300M    |   100M    |    100M   |
+    |_________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    |   OM4   |   50.125   |  MM  |    2000M     |      550M     |     550M      |   400M    |   150M    |    150M   |
+    |_________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    |         |            |      |              |     5km @     |     5km @     |  10km @   |           |           |
+    |   SM    |   9/125    |  SM  |    2000M     |    1310nm     |    1310nm     |  1310nm   |           |           |
+    |_________|____________|______|______________|_______________|_______________|___________|___________|___________|
+    *mode condition patch cable required
+    """
     menu()
 
 if __name__ == '__main__':
