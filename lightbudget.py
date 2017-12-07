@@ -132,7 +132,118 @@ def loss_match(mode, loss):
     menu()
 
 def max_cable():
-    pass
+    getcontext().prec = 10
+    sender = Decimal(raw_input("\nwhat is the sender transmit power: "))
+    receiver = Decimal(raw_input("\nWhat is the receiver sensitivity: "))
+    link_loss_budget = sender - receiver
+    print "\nThe Power Link Loss Budget for this link is %s dB" % link_loss_budget
+    print """\nSingle Mode or Multi Mode?
+    1 - Single Mode
+    2 - Multi Mode"""
+    mode = int(raw_input("Enter the number of your selection: "))
+    connectors = Decimal(raw_input("\nHow many connectors total are in the path of the link: "))
+    if mode == 1:
+        connector_loss = Decimal('0.2') * connectors
+        mode_type = "Single Mode"
+        print """\nWhat is the wavelength being used?
+        1 - 1310
+        2 - 1550"""
+        wave = int(raw_input("\nEnter the number of your selection: "))
+        if wave == 1:
+            wavelength = 1310
+        else:
+            wavelength = 1550
+    else:
+        connector_loss = Decimal('0.5') * connectors
+        mode_type = "Multi Mode"
+        print """\nWhat is the wavelength being used?
+        1 - 850
+        2 - 1300"""
+        wave = int(raw_input("Enter the number of your selection: "))
+        if wave == 1:
+            wavelength = 850
+        else:
+            wavelength = 1300
+    print "\nThe total loss introduced for the %s link by connectors is %s dB\n" % (mode_type, connector_loss)
+    print """What is the split ratio of the TAP?
+    1 - 50/50
+    2 - 60/40
+    3 - 70/30
+    4 - 80/20
+    5 - 90/10"""
+    split = raw_input("Enter the number of your selection: ")
+    if split not in ('1', '2', '3', '4', '5'):
+        print "That is not a valid input for split ratio"
+        menu()
+    if split == '1':
+        split = '50/50'
+    elif split == '2':
+        split = '60/40'
+    elif split == '3':
+        split = '70/30'
+    elif split == '4':
+        split = '80/20'
+    else:
+        split = '90/10'
+    taps_mm = {
+               '50/50': {'Network': '4.5', 'Monitor': '4.5'},
+               '60/40': {'Network': '3.1', 'Monitor': '5.1'},
+               '70/30': {'Network': '2.4', 'Monitor': '6.3'},
+               '80/20': {'Network': '1.8', 'Monitor': '8.1'},
+               '90/10': {'Network': '1.3', 'Monitor': '11.5'}
+               }
+    taps_sm = {
+               '50/50': {'Network': '3.7', 'Monitor': '3.7'},
+               '60/40': {'Network': '2.8', 'Monitor': '4.8'},
+               '70/30': {'Network': '2.0', 'Monitor': '6.1'},
+               '80/20': {'Network': '1.3', 'Monitor': '8.0'},
+               '90/10': {'Network': '0.8', 'Monitor': '12.0'}
+               }
+    if mode_type == 'Single Mode':
+        for ratio in taps_sm:
+            if split == ratio:
+                network = Decimal(taps_sm[ratio]['Network'])
+                monitor = Decimal(taps_sm[ratio]['Monitor'])
+    elif mode_type == 'Multi Mode':
+        for ratio in taps_mm:
+            if split == ratio:
+                network = Decimal(taps_mm[ratio]['Network'])
+                monitor = Decimal(taps_mm[ratio]['Monitor'])
+    else:
+        print 'Something went wrong'
+    total_loss_net = link_loss_budget - connector_loss - network
+    total_loss_mon = link_loss_budget - connector_loss - monitor
+    if mode_type == 'Single Mode' and wavelength == 1310:
+        attenuation = Decimal('0.4')
+    elif mode_type == 'Single Mode' and wavelength == 1500:
+        attenuation = Decimal('0.3')
+    elif mode_type == 'Multi Mode' and wavelength == 850:
+        attenuation = Decimal('3.0')
+    elif mode_type == 'Multi Mode' and wavelength == 1300:
+        attenuation = Decimal('1.0')
+    else:
+        print "Something went wrong."
+    cable_net = 1
+    cable_loss_net = Decimal(cable_net / 1000) * attenuation
+    while total_loss_net - cable_loss_net > 0:
+        cable_net += 1
+        cable_loss_net = Decimal(cable_net / 1000) * attenuation
+    cable_mon = 1
+    cable_loss_mon = Decimal(cable_mon / 1000) * attenuation
+    while total_loss_mon - cable_loss_mon > 0:
+        cable_mon += 1
+        cable_loss_mon = Decimal(cable_mon / 1000) * attenuation
+    if mode_type == 'Single Mode' and cable_net > 10000:
+        cable_net = 10000
+    if mode_type == 'Single Mode' and cable_mon > 10000:
+        cable_mon = 10000
+    if mode_type == 'Multi Mode' and cable_net > 2000:
+        cable_net = 2000
+    if mode_type == 'Multi Mode' and cable_mon > 2000:
+        cable_mon = 2000
+    print "\nThe maximum combined cable length from sender to TAP and from TAP to receiver is %s meters" % cable_net
+    print "\nThe maximum combined cable length from sender to TAP and from TAP monitor to tool is %s meters" % cable_mon
+    menu()
 
 if __name__ == '__main__':
     menu()
