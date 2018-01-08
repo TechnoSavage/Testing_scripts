@@ -2,7 +2,7 @@
 
 #! /usr/bin/python
 
-import urllib2, time, random, shutil
+import urllib2, time, random, shutil, os
 from getpass import getpass
 from contextlib import closing
 
@@ -12,9 +12,8 @@ def download(address, user=None, passwd=None):
     chosen = file_list[random.randrange(0,3)]
     url = 'ftp://%s:%s@%s/%s' % (user, passwd, address, chosen)
     print "Downloading %s from %s" % (chosen, url)
-    path = '/dev/null/%s' % chosen
     with closing(urllib2.urlopen(url)) as r:
-        with open(path, 'wb') as f:
+        with open(os.devnull, 'wb') as f:
             shutil.copyfileobj(r, f)
     print "Download Finished"
 
