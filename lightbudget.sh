@@ -76,9 +76,9 @@ cable_loss=$(bc <<< "scale=10;$cable/1000* $attenuation")
 echo "The loss introduced by the length of cable for the $mode_type $wavelength nm link
   is $cable_loss dB based on $attenuation dB/km fiber attenuation."
 total_cable_loss=$(bc <<< "scale=10;$connector_loss+ $cable_loss")
-echo "The total connection loss is $total_cable_loss dB"
+echo "The total connection loss is $total_cable_loss dB."
 allowable_loss=$(bc <<< "scale=10;$link_loss_budget- $total_cable_loss")
-echo "The allowable coupler loss for a TAP is a $allowable_loss dB maximum at the monitor port"
+echo "The allowable coupler loss for a TAP is a $allowable_loss dB maximum at the monitor port."
 read -p "Reference which TAP insertion loss values?
 1 - Industry Standard
 2 - Cubro Average
@@ -259,27 +259,27 @@ else
   menu
 fi
 cable_net=1
-cable_loss_net=$(bc <<< "scale=10;$cable_net/1000* $attenuation")
+cable_loss_net=$(bc <<< "scale=10;$cable_net* $attenuation/1000")
 while (( $( echo "$total_loss_net - $cable_loss_net > 0" | bc -l ) )); do
   cable_net+=1
-  cable_loss_net=$(bc <<< "scale=10;$cable_net/1000* $attenuation")
+  cable_loss_net=$(bc <<< "scale=10;$cable_net* $attenuation/1000")
 done
 cable_mon=1
-cable_loss_mon=$(bc <<< "scale=10;$cable_mon/1000* $attenuation")
+cable_loss_mon=$(bc <<< "scale=10;$cable_mon* $attenuation/1000")
 while (( $( echo "$total_loss_mon - $cable_loss_mon > 0" | bc -l ) )); do
   cable_mon+=1
-  cable_loss_mon=$(bc <<< "scale=10;$cable_mon/1000* $attenuation")
+  cable_loss_mon=$(bc <<< "scale=10;$cable_mon* $attenuation/1000")
 done
-if [[ $mode_type == "Single-Mode" && $( echo "$cable_net > 10000" | bc -l ) ]]; then
+if [[ $mode_type == "Single-Mode" && $( echo "$cable_net > 10000" | bc -l ) == 1 ]]; then
   cable_net=10000
 fi
-if [[ $mode_type == "Single-Mode" && $( echo "$cable_mon > 10000" | bc -l ) ]]; then
+if [[ $mode_type == "Single-Mode" && $( echo "$cable_mon > 10000" | bc -l ) == 1 ]]; then
   cable_mon=10000
 fi
-if [[ $mode_type == "Multi-Mode" && $( echo "$cable_net > 2000" | bc -l ) ]]; then
+if [[ $mode_type == "Multi-Mode" &&  $( echo "$cable_net > 2000" | bc -l ) == 1 ]]; then
   cable_net=2000
 fi
-if [[ $mode_type == "Multi-Mode" && $( echo "$cable_mon > 2000" | bc -l ) ]]; then
+if [[ $mode_type == "Multi-Mode" &&  $( echo "$cable_mon > 2000" | bc -l ) == 1 ]]; then
   cable_mon=2000
 fi
 echo "The maximum combined cable length from sender to TAP and from

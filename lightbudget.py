@@ -193,10 +193,10 @@ def max_cable():
     else:
         connector_loss = Decimal('0.5') * connectors
         mode_type = "Multi Mode"
-        print """\nWhat is the wavelength being used?
+        wave = raw_input("""\nWhat is the wavelength being used?
         1 - 850nm
-        2 - 1300nm"""
-        wave = raw_input("Enter the number of your selection: ")
+        2 - 1300nm
+        Enter the number of your selection: """)
         if wave not in ('1', '2'):
             print "That is not a valid selection."
             menu()
@@ -216,16 +216,12 @@ def max_cable():
     if split not in ('1', '2', '3', '4', '5'):
         print "That is not a valid input for split ratio"
         menu()
-    if split == '1':
-        split = '50/50'
-    elif split == '2':
-        split = '60/40'
-    elif split == '3':
-        split = '70/30'
-    elif split == '4':
-        split = '80/20'
-    else:
-        split = '90/10'
+    split_ratios = {'1': '50/50',
+                    '2': '60/40',
+                    '3': '70/30',
+                    '4': '80/20',
+                    '5': '90/10'}
+    ratio = split_ratios[split]
     taps_mm = {'50/50': {'Network': '4.5', 'Monitor': '4.5'},
                '60/40': {'Network': '3.1', 'Monitor': '5.1'},
                '70/30': {'Network': '2.4', 'Monitor': '6.3'},
@@ -237,15 +233,15 @@ def max_cable():
                '80/20': {'Network': '1.3', 'Monitor': '8.0'},
                '90/10': {'Network': '0.8', 'Monitor': '12.0'}}
     if mode_type == 'Single Mode':
-        for ratio in taps_sm:
-            if split == ratio:
-                network = Decimal(taps_sm[ratio]['Network'])
-                monitor = Decimal(taps_sm[ratio]['Monitor'])
+        for value in taps_sm:
+            if ratio == value:
+                network = Decimal(taps_sm[value]['Network'])
+                monitor = Decimal(taps_sm[value]['Monitor'])
     elif mode_type == 'Multi Mode':
-        for ratio in taps_mm:
-            if split == ratio:
-                network = Decimal(taps_mm[ratio]['Network'])
-                monitor = Decimal(taps_mm[ratio]['Monitor'])
+        for value in taps_mm:
+            if ratio == value:
+                network = Decimal(taps_mm[value]['Network'])
+                monitor = Decimal(taps_mm[value]['Monitor'])
     else:
         print 'Something went wrong'
     total_loss_net = link_loss_budget - connector_loss - network
@@ -261,23 +257,97 @@ def max_cable():
     else:
         print "Something went wrong."
     cable_net = 1
-    cable_loss_net = Decimal(cable_net / 1000) * attenuation
+    cable_loss_net = Decimal(cable_net * (attenuation / 1000))
     while total_loss_net - cable_loss_net > 0:
         cable_net += 1
-        cable_loss_net = Decimal(cable_net / 1000) * attenuation
+        cable_loss_net = Decimal(cable_net * (attenuation / 1000))
     cable_mon = 1
-    cable_loss_mon = Decimal(cable_mon / 1000) * attenuation
+    cable_loss_mon = Decimal(cable_mon * (attenuation / 1000))
     while total_loss_mon - cable_loss_mon > 0:
         cable_mon += 1
-        cable_loss_mon = Decimal(cable_mon / 1000) * attenuation
-    if mode_type == 'Single Mode' and cable_net > 10000:
-        cable_net = 10000
-    if mode_type == 'Single Mode' and cable_mon > 10000:
-        cable_mon = 10000
-    if mode_type == 'Multi Mode' and cable_net > 2000:
-        cable_net = 2000
-    if mode_type == 'Multi Mode' and cable_mon > 2000:
-        cable_mon = 2000
+        cable_loss_mon = Decimal(cable_mon * (attenuation / 1000))
+    cable_by_eth_standard(mode_type, cable_net, cable_mon)
+
+def cable_by_eth_standard(mode_type, cable_net, cable_mon):
+    """ Determines what the maximum cable length could be given a Ethernet
+        fiber standard."""
+    if mode_type == 'Multi Mode':
+        standard_type = raw_input("""\nWhat is the Ethernet Standard in use?
+        1 - OM1-SX
+        2 - OM1-LX
+        3 - OM2
+        4 - OM3
+        5 - OM4
+        Enter the number of your selection: """)
+        if standard_type not in ('1', '2', '3', '4', '5'):
+            print "That is not a valid selection."
+            menu()
+        standard_table = {'1': 'OM1-SX',
+                          '2': 'OM1-LX',
+                          '3': 'OM2',
+                          '4': 'OM3',
+                          '5': 'OM4'}
+        standard = standard_table[standard_type]
+    speed = raw_input("""\nWhat speed is the link?
+    1 - 100M
+    2 - 1G
+    3 - 10G
+    4 - 40G
+    5 - 100G
+    Enter the number of your selection: """)
+    if speed not in ('1', '2', '3', '4', '5'):
+        print "That is not a valid selection."
+        menu()
+    speed_table = {'1': '100M',
+                   '2': '1G',
+                   '3': '10G',
+                   '4': '40G',
+                   '5': '100G'}
+    link_speed = speed_table[speed]
+    table = {
+        'Single Mode':{'100M': 2000,
+                       '1G': 5000,
+                       '10G': 10000,
+                       '40G': 'Unknown',
+                       '100G': 'Unknown'},
+        'Multi Mode': {'OM1-SX': {'100M': 2000,
+                                  '1G': 275,
+                                  '10G': 33},
+                       'OM1-LX': {'100M': 2000,
+                                  '1G': 550,
+                                  '10G': 33},
+                       'OM2': {'100M': 2000,
+                               '1G': 550,
+                               '10G': 82},
+                       'OM3': {'100M': 2000,
+                               '1G': 550,
+                               '10G': 300,
+                               '40G': 100,
+                               '100G': 100},
+                       'OM4': {'100M': 2000,
+                               '1G': 550,
+                               '10G': 400,
+                               '40G': 150,
+                               '100G': 150}
+                      }}
+    if mode_type == 'Single Mode':
+        try:
+            max_standard_length = table['Single Mode'][link_speed]
+            if cable_net > max_standard_length:
+                cable_net = max_standard_length
+            if cable_mon > max_standard_length:
+                cable_mon = max_standard_length
+        except (KeyError, ValueError) as reason:
+            print ("That standard does not support that speed.", reason)
+    if mode_type == 'Multi Mode':
+        try:
+            max_standard_length = table['Multi Mode'][standard][link_speed]
+            if cable_net > max_standard_length:
+                cable_net = max_standard_length
+            if cable_mon > max_standard_length:
+                cable_mon = max_standard_length
+        except KeyError as reason:
+            print ("That standard does not support that speed.", reason)
     print ("\nThe maximum combined cable length from sender to TAP and from "
            "TAP to receiver is %s meters" % cable_net)
     print ("\nThe maximum combined cable length from sender to TAP and from "
