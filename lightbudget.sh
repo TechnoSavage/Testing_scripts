@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Calculate the light budget for an optical link and determin appropriate TAP
+#Calculate the light budget for an optical link and determine appropriate TAP
 #split ratios or maximum cable length that can be used with a given TAP
 
 menu () {
