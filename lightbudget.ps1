@@ -14,9 +14,9 @@ function menu {
 }
 
 function max_split {
-  $sender = Read-Host "`nWhat is the sender transmit power (dB)"
+  $transmit = Read-Host "`nWhat is the transmit transmit power (dB)"
   $receiver = Read-Host "`nWhat is the receiver sensitivity (dB)"
-  $link_loss_budget = $sender - $receiver
+  $link_loss_budget = $transmit - $receiver
   Write-Host "`nThe Power Link Loss Budget for this link is $link_loss_budget dB."
   [int]$mode = Read-Host "`nSingle-Mode or Multi-Mode fiber?
   1 - Single-Mode
@@ -46,7 +46,7 @@ function max_split {
   Else {Write-Host "`nThat is not a valid input."
     menu}
   Write-Host "`nThe total loss introduced for the $mode_type link by connectors is $connector_loss dB."
-  [int]$cable = Read-Host "`nWhat is the cable length, in meters, from the sender to the receiver?"
+  [int]$cable = Read-Host "`nWhat is the cable length, in meters, from the transmit to the receiver?"
   If ($mode_type -eq 'Single-Mode' -and $wavelength -eq 1310) {
     $attenuation = 0.4}
   ElseIf ($mode_type -eq 'Single-Mode' -and $wavelength -eq 1550) {
@@ -145,9 +145,9 @@ function match_cubro {
 }
 
 function max_cable {
-  $sender = Read-Host "`nWhat is the sender transmit power (dB)"
+  $transmit = Read-Host "`nWhat is the transmit transmit power (dB)"
   $receiver = Read-Host "`nWhat is the receiver sensitivity (dB)"
-  $link_loss_budget = $sender - $receiver
+  $link_loss_budget = $transmit - $receiver
   Write-Host "`nThe Power Link Loss Budget for this link is $link_loss_budget dB."
   [int]$mode = Read-Host "`nSingle-Mode or Multi-Mode fiber?
   1 - Single-Mode
@@ -348,9 +348,9 @@ function cable_by_eth_standard {
       $cable_net = $max_standard_length}
     If ($cable_mon -gt $max_standard_length) {
       $cable_mon = $max_standard_length}
-  Write-Host "`nThe maximum combined cable length from sender to TAP and from
+  Write-Host "`nThe maximum combined cable length from transmit to TAP and from
               TAP to receiver is $cable_net meters."
-  Write-Host "`nThe maximum combined cable length from sender to TAP and from
+  Write-Host "`nThe maximum combined cable length from transmit to TAP and from
               TAP monitor to tool is $cable_mon meters."
   menu
   }
